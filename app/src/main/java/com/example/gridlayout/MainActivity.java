@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private Boolean running = true;
     private int seconds = 0;
     private Boolean bombed = false;
+    private boolean game_won = false;
 
     private ArrayList<Boolean> flagged;
     private int bombsToFlag = 4;
@@ -107,6 +108,12 @@ public class MainActivity extends AppCompatActivity {
             neighbors.add(9);
 
             for (int num : neighbors) {
+                if (b%8==0 && (num == -9 || num == -1 || num == 7)) {
+                    continue;
+                }
+                if ((b + 1) % 8 == 0 && (num == -7 || num == 1 || num == 9)) {
+                    continue;
+                }
                 if (b+num > -1 && b+num < 80) {
                     cell_value.set(b+num, cell_value.get(b+num)+1);;
                 }
@@ -145,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             // Go to results
         }
 
-        if (!mining) {
+        else if (!mining) {
             if (tv.getText() == getString(R.string.flag)) {
                 tv.setText("");
                 bombsToFlag += 1;
@@ -177,6 +184,10 @@ public class MainActivity extends AppCompatActivity {
             else {
                 visited.add(tv);
                 bfs(tv);
+                if (visited.size() == 76) {
+                    running = false;
+                    game_won = true;
+                }
             }
         }
 
@@ -290,27 +301,43 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<TextView> queue = new ArrayList<TextView>();
         queue.add(tv);
 
-        while (queue.size() !=0) {
+        while (!queue.isEmpty()) {
             TextView current = queue.remove(0);
             int index = findIndexOfCellTextView(current);
 
             // If current is a neighbor of a bomb, we reveal it and return
-            if (cell_value.get(index) > 0) {
+            if (cell_value.get(index) >= 0) {
                 current.setBackgroundColor(Color.LTGRAY);
-                current.setText(cell_value.get(index));
+                current.setText(String.valueOf(cell_value.get(index)));
                 current.setTextColor(Color.GRAY);
-                return;
+                // Does not continue bfs from this square if neighbor
+                if (cell_value.get(index) > 0) {
+                    return;
+                }
             }
             // If current is empty, add neighbors
-            else {
-                ArrayList<Integer> neighbors = new ArrayList<Integer>();
-                neighbors.add(-7);
-                neighbors.add(7);
-                neighbors.add(-1);
-                neighbors.add(1);
+            ArrayList<Integer> neighbors = new ArrayList<Integer>();
+            neighbors.add(-8);
+            neighbors.add(8);
+            neighbors.add(-1);
+            neighbors.add(1);
 
+            for (int n: neighbors) {
+                int neighbor_index = index + n;
+                if (neighbor_index < 0 || neighbor_index > 79) {
+                    continue;
+                }
+                if ((index % 8 == 0) && (n == -1)) {
+                    continue;
+                }
+                if ((index+1)%8 == 0 && (n == 1)) {
+                    continue;
+                }
+                if (!visited.contains(cell_tvs.get(neighbor_index))) {
+                    queue.add(cell_tvs.get(neighbor_index));
+                    visited.add(cell_tvs.get(neighbor_index));
+                }
             }
-
 
         }
     }
