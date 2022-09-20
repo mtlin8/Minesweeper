@@ -1,8 +1,10 @@
 <resources>
-    <string name="app_name">CS 310: Mitchell Lin</string>
+    <string name="app_name">Minesweeper</string>
+    <string name="title">CS 310 Mitchell Lin</string>
     <string name="clock">\uD83D\uDD53</string>
     <string name="flag">\uD83D\uDEA9</string>
     <string name="mine">\uD83D\uDCA3</string>
     <string name="pick">\u26CF</string>
-    <integer name="time">69</integer>
+    <string name="seconds">1</string>
+    <string name="flagCount">R.flagCount</string>
 </resources>
