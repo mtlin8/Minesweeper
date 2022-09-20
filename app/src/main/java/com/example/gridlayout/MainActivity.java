@@ -3,6 +3,7 @@ package com.example.gridlayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.gridlayout.widget.GridLayout;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -125,12 +126,6 @@ public class MainActivity extends AppCompatActivity {
 
         mining = true; // Set mining to be true.
         running = true;
-        for (int i = 0; i < cell_value.size(); i ++) {
-            TextView t = (TextView) cell_tvs.get(i);
-            t.setText(String.valueOf(cell_value.get(i)));
-            t.setTextColor(Color.GRAY);
-        }
-
     }
 
     private int findIndexOfCellTextView(TextView tv) {
@@ -150,6 +145,10 @@ public class MainActivity extends AppCompatActivity {
         // If game is over we go to results screen
         if (!running) {
             // Go to results
+            Intent intent = new Intent(this, Results.class);
+            intent.putExtra("time", seconds);
+            intent.putExtra("game_won", game_won);
+            startActivity(intent);
         }
 
         else if (!mining) {
@@ -190,111 +189,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
-////        tv.setText(String.valueOf(i)+String.valueOf(j));
-////        tv.setText(String.valueOf(n));
-//        if (mining && running) {
-//            if (isBomb(tv)) {
-//                // This is an L – send the user home.
-//                // Reveal all bombs.
-//                TextView clicked = tv;
-//                Iterator<Integer> it = bombs.iterator();
-//                while(it.hasNext()) {
-//                    tv = cell_tvs.get(it.next());
-//                    tv.setText(R.string.mine); // How to set to mine?
-//                    tv.setBackgroundColor(Color.GRAY);
-//                }
-//                clicked.setBackgroundColor(Color.RED);
-//                bombed = true;
-//                running = false;
-//            }
-//            else bfs(tv);
-//        }
-//        else if (!mining && running){
-//            // Set and display a flag and up the flag counter.
-//            if (flagged.get(n)) {
-//                tv.setText("");
-//                if(isBomb(tv)) {
-//                    bombsToFlag++;
-//                }
-//                flagged.set(n, false);
-//            }
-//            else {
-//                tv.setText(R.string.flag);
-//                if(isBomb(tv)) {
-//                    bombsToFlag--;
-//                }
-//                flagged.set(n, true);
-//            }
-//
-//        }
-//
-//        if (bombed){
-//            // You lose
-//        }
-//        else if (!running){
-//            // You win
-//        }
     }
-
-
-    public Boolean isBomb(View view) {
-        TextView tv = (TextView) view;
-        int n = findIndexOfCellTextView(tv);
-        if (bombs.contains(n)) return true;
-        else return false;
-    }
-//    public Boolean isClean(View view) {
-//        TextView tv = (TextView) view;
-//        int n = findIndexOfCellTextView(tv);
-//        int i = n/COLUMN_COUNT; // Deriving row index.
-//        int j = n%COLUMN_COUNT; // Deriving column index.
-//
-//        int bombCount = 0;
-//        if (i > 0 && j > 0) {
-//            int a = findIndexOfCellTextView(tv) - 9;
-//            TextView two = cell_tvs.get(a);
-//            if (isBomb(two) || flagged.get(a)) bombCount++;
-//        }
-//        if (j > 0) {
-//            int b = findIndexOfCellTextView(tv) - 8;
-//            TextView two = cell_tvs.get(b);
-//            if (isBomb(two) || flagged.get(b)) bombCount++;
-//        }
-//        if (i > 0 && j < 7) {
-//            int c = findIndexOfCellTextView(tv) - 7;
-//            TextView two = cell_tvs.get(c);
-//            if (isBomb(two) || flagged.get(c)) bombCount++;
-//        }
-//        if (j > 0) {
-//            int d = findIndexOfCellTextView(tv) - 1;
-//            TextView two = cell_tvs.get(d);
-//            if (isBomb(two) || flagged.get(d)) bombCount++;
-//        }
-//        if (j < 7) {
-//            int e = findIndexOfCellTextView(tv) + 1;
-//            TextView two = cell_tvs.get(e);
-//            if (isBomb(two) || flagged.get(e)) bombCount++;
-//        }
-//        if (i < 9 && j > 0) {
-//            int f = findIndexOfCellTextView(tv) + 7;
-//            TextView two = cell_tvs.get(f);
-//            if (isBomb(two) || flagged.get(f)) bombCount++;
-//        }
-//        if (i < 9) {
-//            int g = findIndexOfCellTextView(tv) + 8;
-//            TextView two = cell_tvs.get(g);
-//            if (isBomb(two) || flagged.get(g)) bombCount++;
-//        }
-//        if (i < 9 && j < 7) {
-//            int h = findIndexOfCellTextView(tv) + 9;
-//            TextView two = cell_tvs.get(h);
-//            if (isBomb(two) || flagged.get(h)) bombCount++;
-//        }
-//
-//        if (bombCount == 0) return true;
-//        else return false;
-//    }
 
     public void bfs(View view) {
         TextView tv = (TextView) view;
@@ -305,14 +200,19 @@ public class MainActivity extends AppCompatActivity {
             TextView current = queue.remove(0);
             int index = findIndexOfCellTextView(current);
 
+            // If current is flagged, we continue
+            if (current.getText() == getString(R.string.flag)) {
+                continue;
+            }
+
             // If current is a neighbor of a bomb, we reveal it and return
             if (cell_value.get(index) >= 0) {
                 current.setBackgroundColor(Color.LTGRAY);
                 current.setText(String.valueOf(cell_value.get(index)));
                 current.setTextColor(Color.GRAY);
-                // Does not continue bfs from this square if neighbor
+                // Does not continue bfs from this square if is bomb neighbor
                 if (cell_value.get(index) > 0) {
-                    return;
+                    continue;
                 }
             }
             // If current is empty, add neighbors
